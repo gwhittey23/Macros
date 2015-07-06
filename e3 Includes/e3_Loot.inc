@@ -52,7 +52,31 @@ SUB Event_YourKill
 /if (${Debug} || ${Debug_Loot}) /echo <== Event_YourKill -|
 /RETURN
 
+|------------------------------------------------------------|
+|- Manual tell bot loot engage looting functions			-|
+|------------------------------------------------------------|
 
+
+#event Bot_Loot "<#1#> Loot Mob #2#"
+#event Bot_Loot "#1# tell your party, 'Loot Mob #2#'"
+#event Bot_Loot "#1# tells the group, 'Loot Mob #2#'"
+#event Bot_Loot "#1# tells you, 'Loot Mob #2#'"
+
+SUB Event_Bot_Loot(line, ChatSender, int MobID)
+| -Verify the event
+	/call verifyEvent "${ChatSender}" "${line}"
+	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+	|    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+		| -If msgTarget is not an ID, find TargetID.
+		/echo msgTarget = ${MobID}
+
+		/call loot_It ${MobID}
+	}
+
+
+/if (${Debug} || ${Debug_Loot}) /echo <== Event_YourKill -|
+/RETURN
 
 |------------------------------------------------------------------------|
 |- Moves to corpse and begins looting, reads Loot_Ini for loot handles.	-|
@@ -409,7 +433,36 @@ SUB EVENT_updateLootSetting(line, ChatSender, itemName, iniSetting)
 /if (${Debug} || ${Debug_Loot}) /echo <== EVENT_updateLootSetting -|
 /RETURN
 
+#event toggleAutoLoot "[#1#] Toggle AutoLoot #2#"
+#event toggleAutoLoot "<#1#> Toggle AutoLoot #2#"
+#event toggleAutoLoot "#1# tells you, 'Toggle AutoLoot #2#'"
+#event toggleAutoLoot "#1# tell the group, 'Toggle AutoLoot #2#'"
+#event toggleAutoLoot "#1# tells the group, 'Toggle AutoLoot #2#'"
+SUB event_toggleAutoLoot(line, ChatSender, auto_lootSetting)
+/if (${Debug} || ${Debug_Loot}) /echo |- EVENT_toggleAutoLoot ==>
+| -Verify the event
+	/call verifyEvent "${ChatSender}" "${line}"
+	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+	|    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
+		/if (${auto_lootSetting.Equal[on]}) {
+		/varset auto_lootSetting TRUE
+	} else /if (${auto_lootSetting.Equal[off]}) {
+		/varset auto_lootSetting FALSE
+	}
+	/varset Auto_Loot ${auto_lootSetting}
+	/echo ${buff_state} ${auto_lootSetting}
 
+	/docommand ${ChatToggle} Auto_Loot [${If[${Auto_Loot},ON,OFF]}]
+
+	}
+
+
+
+
+
+/if (${Debug} || ${Debug_Loot}) /echo <== EVENT_toggleAutoLoot -|
+/RETURN
 
 SUB loot_Setup
 /call INItoVar "${advSettings_Ini},Debug,Debug Loot (On/Off)" Debug_Loot bool outer
@@ -417,7 +470,7 @@ SUB loot_Setup
 
 	| Declare looting variables
 	/declare looted_Corpses string outer
-
+	/declare Auto_Loot bool outer FALSE
 	| Add Looting File Paths
 	/if (!${Ini[${MacroData_Ini},File Paths,Loot Settings File].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Loot Settings File" "e3 Macro Inis\Loot Settings.ini" 1
 	
@@ -440,7 +493,8 @@ SUB loot_Setup
 
 	| Import character settings
 	/if (${Bool[${Ini[${Character_Ini},Misc,Auto-Loot (On/Off)]}]}) /call IniToVar "${Character_Ini},Misc,Auto-Loot (On/Off)" Auto_Loot bool outer
-	
+	|/if (${Auto_Loot}) /varset buff_state TRUE
+
 	| Load MQ2LinkDB
 	/if (${use_linkDB} && ${Auto_Loot} && !${Plugin[MQ2LinkDB].Name.Length}) {
 		/echo Plugin MQ2LinkDB is not loaded, attempting to resolve...
@@ -490,8 +544,12 @@ SUB loot_CharacterSettings
 
 
 
+
 Sub loot_Aliases
 /if (${Debug} || ${Debug_Loot}) /echo |- _Aliases ==>
-
+	/noparse /squelch /alias /DoLoot /bc Loot Mob ${Target.ID}
+	|/noparse /squelch /alias /DoLootByName /bc Loot Mob ${Target.ID}
+	/noparse /squelch /alias /ToggleAutoLoot /bc Toggle AutoLoot
+	/noparse /squelch /alias /ToggleLootBot /bc Toggle AutoLoot /Only|${Target.Name}
 /if (${Debug} || ${Debug_Loot}) /echo <== _Aliases -|
 /return
