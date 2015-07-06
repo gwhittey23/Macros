@@ -131,7 +131,7 @@ SUB e3_Setup(modeSelect)
 
 | Complete a pending exchange ============================================================================================= 
 	/if (${Ini[${MacroData_Ini},${MacroQuest.Server}-${Me.CleanName},Pending Exchange].Length} && ${Ini[${MacroData_Ini},${MacroQuest.Server}-${Me.CleanName},Pending Exchange].NotEqual[NONE]} && !${itemExchange_Timer}) /call completePendingExchange
-	
+
 | ========================================================================================================================= 
 	
 	/echo e3 loaded.

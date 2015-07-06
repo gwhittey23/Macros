@@ -150,7 +150,7 @@ SUB buffSelf
 	
 		/varset castName ${SelfBuffs[${i}].Arg[1,/]}
 		/varset buffName ${If[${Me.Book[${castName}]} || ${Me.AltAbility[${castName}]},${castName},${FindItem[${castName}].Spell}]}
-		
+
 		|  /BuffName Check.
 		/if (${SelfBuffs[${i}].Find[/buffname|]}) {
 			/call argueString buffname "${SelfBuffs[${i}]}"
@@ -347,14 +347,14 @@ SUB event_BuffAll
 
 
 
-#EVENT toggleBuffs "[#1#] Toggle Buffs #2#"
-#EVENT toggleBuffs "<#1#> Toggle Buffs #2#"
-#EVENT toggleBuffs "#1# tells you, 'Toggle Buffs #2#'"
-#EVENT toggleBuffs "#1# tell the group, 'Toggle Buffs #2#'"
-#EVENT toggleBuffs "#1# tells the group, 'Toggle Buffs #2#'"
+#event toggleBuffs "[#1#] Toggle Buffs #2#"
+#event toggleBuffs "<#1#> Toggle Buffs #2#"
+#event toggleBuffs "#1# tells you, 'Toggle Buffs #2#'"
+#event toggleBuffs "#1# tell the group, 'Toggle Buffs #2#'"
+#event toggleBuffs "#1# tells the group, 'Toggle Buffs #2#'"
 SUB EVENT_toggleBuffs(line, ChatSender, buffSetting)
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- EVENT_toggleBuffs ==>
-
+	/echo OK
 	/if (${buffSetting.Equal[on]}) {
 		/varset buffSetting TRUE
 	} else /if (${buffSetting.Equal[off]}) {
@@ -364,6 +364,7 @@ SUB EVENT_toggleBuffs(line, ChatSender, buffSetting)
 	/varset BuffCheck ${buffSetting}
 	
 	/docommand ${ChatToggle} BuffCheck [${If[${BuffCheck},ON,OFF]}]
+	/echo theBuffCheck = ${buffSetting}
 
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== EVENT_toggleBuffs -|
 /RETURN
@@ -434,7 +435,7 @@ Sub buffCheck_Aliases
 	/noparse /squelch /alias /BuffIt /bc Buff ${Target.ID}
 	/squelch /alias /BuffAll /bc Buff All
 	/squelch /alias /BuffGroups /bc Buff All
-	/noparse /squelch /alias /BuffPet /bc Buff ${Spawn[pet ${Spawn[id ${Target.ID}].Pet}].ID}
+	/noparse /squelch /alias /BuffPet /bc Buff ${Spawn[pet ${Spawn[id ${Me.ID}].Pet}].ID}
 	/squelch /alias /BuffCheck /bc Toggle Buffs
 
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== buffCheck_Aliases -|

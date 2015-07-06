@@ -20,11 +20,11 @@ SUB Event_YourKill
 
 	| If I am a looter.
 	/if (${Auto_Loot}) {
-	
+
 		/declare new_lootedList string local
-		
+
 		/declare i int local 1
-	
+
 		| If I have a list of looted corpses, check if any of them have Disappeared.  If they have, rebuild the list
 		/if (${looted_Corpses.Length}) {
 			:check_vanished_Corpses
@@ -33,19 +33,19 @@ SUB Event_YourKill
 			/if (${Bool[${looted_Corpses.Arg[${i},,]}]}) /goto :check_vanished_Corpses
 			/varset looted_Corpses ${new_lootedList}
 		}
-		
+
 		| Check all the corpses within the seek_Radius to see if they have been looted.  If not, call loot_It
 		/for i 1 to ${SpawnCount[npc corpse radius ${seek_Radius}]}
-		
+
 			/if (${Bool[${looted_Corpses}]} && ${Select[${NearestSpawn[${i},corpse radius ${seek_Radius}].ID},${looted_Corpses}]}) /goto :skip_Loot
-	
+
 			/call loot_It ${NearestSpawn[${i},corpse radius ${seek_Radius}].ID}
-			
+
 			| If I just looted a corpse, wait a moment before moving to the next
 			/if (${Macro.Return.Equal[JUST_LOOTED]}) /delay 3
-			
+
 			:skip_Loot
-			
+
 		/next i
 	}
 
