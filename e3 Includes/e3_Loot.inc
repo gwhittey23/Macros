@@ -441,11 +441,12 @@ SUB EVENT_updateLootSetting(line, ChatSender, itemName, iniSetting)
 SUB event_toggleAutoLoot(line, ChatSender, auto_lootSetting)
 /if (${Debug} || ${Debug_Loot}) /echo |- EVENT_toggleAutoLoot ==>
 | -Verify the event
+	/echo ${auto_lootSetting.Arg[1, ]}
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-	|    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+	|    |-----------Valid User----------|    |---------Included Bot----------|
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
-		/if (${auto_lootSetting.Equal[on]}) {
+		/if (${auto_lootSetting.Arg[1, ].Equal[on]}) {
 		/varset auto_lootSetting TRUE
 	} else /if (${auto_lootSetting.Equal[off]}) {
 		/varset auto_lootSetting FALSE
