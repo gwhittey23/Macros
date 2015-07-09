@@ -250,6 +250,9 @@ Sub pet_Setup
 			/if (${Ini[${Character_Ini},Pets,Pet Auto-Shrink (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)" petAutoShrink bool outer	
 			/if (${Ini[${Character_Ini},Pets,Pet Heal].Length}) /call INItoVar "${Character_Ini},Pets,Pet Heal" petHeal string outer
 			/if (${Ini[${Character_Ini},Pets,Pet Mend (Pct)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Mend (Pct)" petMendPct int outer
+			|/if (${Ini[${Character_Ini},Pets,Auto-Pet Weapons (On/Off)].Length}) /call IniToVar "${Character_Ini},Pets,Auto-Pet Weapons (On/Off)" autoWeapons bool outer
+			/if (${Ini[${genSettings_Ini},Pets,Summoned Pet Item#1].Length}) /call IniToArray "${genSettings_Ini},Pets,Summoned Pet Item#" summonedpetItems
+
 			/if (${Ini[${Character_Ini},Pets,Pet Buff#1].Length}) {
 				/call INItoArray "${Character_Ini},Pets,Pet Buff#" petBuffs
 				/declare pet_rebuffTimer timer outer
@@ -283,7 +286,7 @@ SUB pet_MacroSettings
 SUB pet_CharacterSettings
 /if (${Debug} || ${Debug_Pets}) /echo |- pet_CharacterSettings ==>
 
-	/if (${Select[${Me.Class.ShortName},BST,ENC,MAG,NEC,SHD,SHM]}) {	
+	/if (${Select[${Me.Class.ShortName},BST,DRD,ENC,MAG,NEC,SHD,SHM]}) {
 		/call WriteToIni "${Character_Ini},Pets,Pet Spell"
 		/call WriteToIni "${Character_Ini},Pets,Pet Taunt (On/Off)"
 		/call WriteToIni "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)"
@@ -308,3 +311,238 @@ Sub pet_Aliases
 
 /if (${Debug} || ${Debug_Pets}) /echo <== pet_Aliases -|
 /return
+
+
+
+#event petShank "#1# tells you, 'give Shank'"
+#event petShank "<#1#> Pet Shank"
+#event petShank "#1# tells you, 'Pet Shank'"
+#event petShank "<#1#> Pet Shank"
+sub event_petShank(string line, string ChatSender)
+/echo OK
+/if (${Debug} || ${Debug_MAG}) /echo |- event_petShank ==>
+
+	/if (${summonedpetItems.Size}) {
+
+		| -Verify the event
+		/call verifyEvent "${ChatSender}" "${line}"
+		/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+		|    |-----------Valid User----------|
+		/if (!${Bool[${Macro.Return.Arg[2,_]}]}) {
+
+			/call IniToVar "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool local
+
+			| If the user is not valid, check allow_BuffRequests
+			/if (${Macro.Return}) {
+
+				| If allow_BuffRequests=TRUE, check restricked PCs
+				/if (!${Select[${ChatSender},${Ini[${Macro_Ini},Buff Requests,Restricted PCs]}]}) /goto :allowAccess
+			}
+		} else {
+
+			:allowAccess
+
+			/if (!${SpawnCount[pc ${ChatSender}]}) {
+				/if (${Debug} || ${Debug_MAG}) /echo |- event_petShank -| [${ChatSender}] is not in ${Zone}.
+			} else {
+
+				/if (${Spawn[pc ${ChatSender}].Distance} > 200) {
+					/tell ${ChatSender} You're too far away.
+				} else {
+
+					/if (!${Spawn[pc ${ChatSender}].LineOfSight}) {
+						/tell ${ChatSender} I can't see you.
+					} else {
+
+						/if (!${Spawn[pet ${Spawn[pc ${ChatSender}].Pet}].ID}) {
+							/tell ${ChatSender} You don't have a pet, jackass!
+						} else {
+
+							/if (${ChatSender.NotEqual[${Me}]}) /tell ${ChatSender} Incoming pet weapons.  Please stay still for a few moments.
+
+							| Declare local variables
+							/declare i int local
+							/declare x int local
+							/declare e int local
+							/declare retryTimer timer local
+							/declare miscTimer timer local
+							/declare summonedItem string local
+
+							| Target the pet, and move to it
+							/call TrueTarget ${Spawn[pet ${Spawn[pc ${ChatSender}].Pet}].ID}
+							/call MoveTo -SpawnID|${Spawn[pet ${Spawn[pc ${ChatSender}].Pet}].ID}
+
+							/for i 1 to ${summonedpetItems.Size}
+
+							/if (${Target.Distance} < 20) {
+
+
+
+
+								/varset summonedItem  ${summonedpetItems[${i}].Arg[1,/]}
+								/echo summonedItem = ${summonedItem}
+								/echo ${FindItemCount[=${summonedItem}]} ---
+								/if (${FindItemCount[=${summonedItem}]}) {
+
+									/if (${Debug} || ${Debug_MAG}) /echo |- event_petShank -| Dropped [${summonedItem}] in my inventory.
+
+									| Open InventoryWindow.
+									/varset miscTimer 3s
+
+									:openInventory
+									/if (!${Window[InventoryWindow].Open}) /nomodkey /keypress i
+									/delay 5 ${Window[InventoryWindow].Open}
+									/if (!${Window[InventoryWindow].Open} && ${miscTimer}) /goto :openInventory
+
+									| Search packslots.
+									/varset e 0
+									/for x 1 to 8
+
+										| If the item in the packslot is the summoned item, pick it up.
+										/if (!${Me.Inventory[pack${x}].Container} && ${summonedItem.Equal[${Me.Inventory[pack${x}]}]}) {
+											/if (${Debug} || ${Debug_MAG}) /echo |- event_petShank -| Picking up [${summonedItem}] form pack${x}
+											/itemnotify pack${x} leftmouseup
+										} else {
+
+											| If the item in the packslot is a container, search it.
+											/for e 1 to ${Me.Inventory[pack${x}].Container}
+												/if (${summonedItem.Equal[${Me.Inventory[pack${x}].Item[${e}]}]}) {
+													/if (!${Window[pack${x}].Open}) /itemnotify pack${x} rightmouseup
+													/delay 1s ${Window[pack${x}].Open}
+													/if (${Debug} || ${Debug_MAG}) /echo |- event_petShank -| Picking up [${summonedItem}] form pack${x} slot${e}
+													/ctrlkey /itemnotify in pack${x} ${e} leftmouseup
+												}
+											/next e
+										}
+									/next x
+
+									/varset retryTimer 50
+
+									:OpenTrade_Loop
+
+									/click left target
+									/delay 10 ${Window[GiveWnd].Open}
+
+									/if (!${Window[GiveWnd].Open}) {
+										/if (${retryTimer}) {
+											/goto :OpenTrade_Loop
+										} else {
+											/echo Failed to open trade with ${Target.CleanName}.
+										}
+									} else {
+
+										/varset retryTimer 30
+										:WaitAccept_Loop
+
+										/notify GiveWnd GVW_Give_Button LeftMouseUp
+										/delay 5 !${Window[GiveWnd].Open}
+
+										/if (${Window[GiveWnd].Open}) {
+											/if (${retryTimer}) {
+												/goto :WaitAccept_Loop
+											} else {
+												/echo Failed to open trade with ${Target.CleanName}.
+											}
+										}
+									}
+								}
+							}
+
+							/next i
+						}
+					}
+				}
+			}
+		}
+	}
+
+/if (${Debug} || ${Debug_MAG}) /echo <== event_petShank -|
+/return
+
+#event distributePetShank "#1# tells you, 'Hand out Pet Shank'"
+#event distributePetShank "<#1#> Hand out Pet Shank"
+#event distributePetShank "#1# tells you, 'Distribute Pet Shank'"
+#event distributePetShank "<#1#> Distribute Pet Shank"
+sub event_distributePetShank(line, ChatSender)
+/if (${Debug} || ${Debug_MAG}) /echo |- event_distributePetWeapons ==>
+
+	/if (${summonedpetItems.Size}) {
+
+		| -Verify the event
+		/call verifyEvent "${ChatSender}" "${line}"
+		/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+		|    |-----------Valid User----------|
+		/if (!${Bool[${Macro.Return.Arg[2,_]}]}) {
+
+			/call IniToVar "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool local
+
+			| If the user is not valid, check allow_BuffRequests
+			/if (${Macro.Return}) {
+
+				| If allow_BuffRequests=TRUE, check restricked PCs
+				/if (!${Select[${ChatSender},${Ini[${Macro_Ini},Buff Requests,Restricted PCs]}]}) /goto :allowAccess
+			}
+		} else {
+
+			:allowAccess
+
+			/if (!${SpawnCount[pc ${ChatSender}]}) {
+				/if (${Debug} || ${Debug_MAG}) /echo |- EVENT_petWeapons -| [${ChatSender}] is not in ${Zone}.
+			} else {
+
+				/if (${Spawn[pc ${ChatSender}].Distance} > 200) {
+					/tell ${ChatSender} You're too far away.
+				} else {
+
+					/if (!${Spawn[pc ${ChatSender}].LineOfSight}) {
+						/tell ${ChatSender} I can't see you.
+					} else {
+
+
+						/if (${ChatSender.NotEqual[${Me}]}) /tell ${ChatSender} Handing out pet weapons...
+
+						/declare originalLoc string local ${Me.Loc.Replace[ ,]}
+						/declare startingLoc string local ${Spawn[pc ${ChatSender}].Loc.Replace[ ,]}
+
+						/declare nearbyPetOwners string local
+						/declare petOwner string local
+						/declare petID int local
+
+						/declare i int local
+
+
+						| Move to the starting point
+						/call MoveTo -Loc|${startingLoc}
+
+						| Make a list of all the pets nearby
+						/for i 1 to ${SpawnCount[radius 100]}
+
+							/if (${NearestSpawn[${i}].Type.Equal[PC]} && ${Spawn[pc ${NearestSpawn[${i}]}].Pet.ID} && ${Spawn[id ${Spawn[pc ${NearestSpawn[${i}]}].Pet.ID}].LineOfSight}) /varset nearbyPetOwners ${nearbyPetOwners}${NearestSpawn[${i}]},
+
+						/next i
+
+						| Pass out weapons to each person on the nearbyPetOwners list
+
+						/varset i 1
+
+						:next_PetOwner
+
+						| set petOwner and petID, then send the owner a msg.
+						/varset petOwner ${nearbyPetOwners.Arg[${i},,]}
+
+						/call EVENT_petWeapons "${Line}" "${petOwner}"
+
+						/varcalc i ${i} + 1
+						/if (${Bool[${nearbyPetOwners.Arg[${i},,]}]}) /goto :next_PetOwner
+
+						| Move to the starting point
+						/call MoveTo -Loc|${originalLoc}
+					}
+				}
+			}
+		}
+	}
+
+/if (${Debug} || ${Debug_MAG}) /echo <== event_distributePetWeapons -|
+/return
+

@@ -31,7 +31,7 @@ SUB event_Assist(line, ChatSender, int MobID)
 	
 			/if (${Defined[PauseTarget]}) /deletevar PauseTarget
 		
-			| Check that you're not assisting on a corpse, pet or pc
+		7	| Check that you're not assisting on a corpse, pet or pc
 			/if (${Spawn[id ${MobID}].Type.Equal[Corpse]} || !${Select[${Spawn[id ${MobID}].Type},${AcceptableTargetTypes}]}) {
 				/if (${Toggle-PvP}) /goto :assistAnyway
 				/if (${Debug} || ${Debug_Assists}) /echo [${Spawn[id ${MobID}].CleanName}] is not an acceptable TargetType.
