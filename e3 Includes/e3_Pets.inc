@@ -154,6 +154,27 @@ SUB event_shrinkPets(line, ChatSender)
 /RETURN
 
 
+|----------------------------|
+|- Setup to have pet attack  -|
+|-  via shift click on map.	-|
+|----------------------------|
+|----------------------------|
+#event mapPetAttack "<#1#> Pet Map Attack #2#"
+SUB event_mapPetAttack(line, ChatSender, eventParams)
+	/echo ${eventParams.Arg[1, ]}
+
+	| -Verify the event
+	/call verifyEvent "${ChatSender}" "${line}"
+	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+	|    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]}) {
+		/call TrueTarget ${eventParams.Arg[1, ]}
+		/pet qattack
+	}
+
+/RETURN
+
+
 
 |------------------------------------------------------------|
 |- Checks pet health, and attempts to cast PetHeal spells.	-|

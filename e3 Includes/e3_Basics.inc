@@ -129,8 +129,7 @@ SUB AquireFollow
 					| If the FollowTarget is a NetBot, engage MQ2NetAdvPath.
 					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
 						/call TrueTarget ${followTargetID}
-						/echo ${FollowLength}
-						/netfollow on ${FollowLength}
+						/squelch /netfollow on ${FollowLength}
 					} else /if (${NetAdvPath.State}==2) {
 						/squelch /netfollow unpause
 					}

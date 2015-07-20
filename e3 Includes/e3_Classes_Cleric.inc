@@ -108,6 +108,13 @@ sub check_celestialRegen
 #event Rez "#1# tells the group, 'Rezz me'"
 #event Rez "#*# tells the group, 'RezOn #1#'"
 #event Rez "#*# tells the group, 'Rez On #1#'"
+#event Rez "#1# tells the guild, 'Rez'"
+#event Rez "#1# tells the guild, 'Rezz'"
+#event Rez "#1# tells the guild, 'Rez me'"
+#event Rez "#1# tells the guild, 'Rezz me'"
+#event Rez "#*# tells the guild, 'RezOn #1#'"
+#event Rez "#*# tells the guild, 'Rez On #1#'"
+
 sub Event_Rez(string line, string ChatSender)
 /if (${Me.Class.ShortName.Equal[CLR]}) {
 	
