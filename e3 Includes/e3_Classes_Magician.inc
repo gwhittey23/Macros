@@ -313,6 +313,23 @@ Sub MAG_Background_Events
 
 /return
 
+#event castPyrilenSkin "<#1#> PyrSkinPet"
+#event castPyrilenSkin "#1# tells you, 'PyrSkinPet'"
+#event distributcastPyrilenSkinePetWeapons "<#1#> PyrSkinPet"
+sub event_castPyrilenSkin(line, ChatSender)
+/bc ok
+/if (${Debug} || ${Debug_MAG}) /echo |- event_castPyrilenSkin ==>
+/call verifyEvent "${ChatSender}" "${ChatText}"
+/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+/bc sender=${Macro.Return.Arg[1,_]}
+/bc booll=${Bool[${Macro.Return.Arg[2,_]}]}
+	/bc ok2
+	/declare buffTarget int local
+	/varset buffTarget ${Spawn[pet ${Spawn[pc =${ChatSender}].Pet}].ID}
+	/call e3_Cast ${buffTarget} "Pyrilen Skin"
+
+/RETURN
+
 
 
 SUB MAG_MacroSettings
@@ -353,3 +370,4 @@ Sub MAG_Aliases
 
 /if (${Debug} || ${Debug_MAG}) /echo <== MAG_Aliases -|
 /return
+

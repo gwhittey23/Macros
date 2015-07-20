@@ -185,6 +185,7 @@ Sub ENC_Aliases
 
 #event AutoMez "<#*#> Mez All"
 sub event_AutoMez
+/echo mezz
 /if (${Debug}) /echo |- AutoMez -| ==>
 /if (!${Defined[AutoMez_Spell]} && ${Ini[${Character_Ini},Enchanter,Auto-Mez (Spell/Gem/MaxLevel)].Length}) {
 	/call INItoVar "${Character_Ini},Enchanter,Auto-Mez (Spell/Gem/MaxLevel)" UNDEFINED string local

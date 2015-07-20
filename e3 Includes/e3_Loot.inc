@@ -523,6 +523,7 @@ Sub loot_Background_Events
 SUB loot_MacroSettings
 /if (${Debug} || ${Debug_Loot}) /echo |- _MacroSettings ==>
 
+
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Loot (On/Off)"
 
 	/call WriteToIni "${genSettings_Ini},Loot,Auto-Loot Mode (Auto/Manual)" Auto

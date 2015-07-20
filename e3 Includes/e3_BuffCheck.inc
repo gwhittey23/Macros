@@ -243,7 +243,7 @@ SUB buffBots(arrayName)
 					/if (${Spawn[pc =${buffTarget}].Distance} < ${Spell[${buffName}].MyRange} || ${Spawn[pc =${buffTarget}].Distance} < ${Spell[${buffName}].AERange}) {
 						
 						| Cast the buff
-						/bc Casting ${buffName} On ${buffTarget}
+
 						/call e3_Cast ${Spawn[pc =${buffTarget}].ID} "${${arrayName}[${i}]}/GiveUpTimer|${If[!${Me.Book[${castName}]},0,${If[${Me.Gem[${castName}]},20,90]}]}" 
 						
 						| If the spell did not take hold
@@ -354,7 +354,7 @@ SUB event_BuffAll
 #event toggleBuffs "#1# tells the group, 'Toggle Buffs #2#'"
 SUB EVENT_toggleBuffs(line, ChatSender, buffSetting)
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- EVENT_toggleBuffs ==>
-	/echo OK
+
 	/if (${buffSetting.Equal[on]}) {
 		/varset buffSetting TRUE
 	} else /if (${buffSetting.Equal[off]}) {
@@ -440,3 +440,5 @@ Sub buffCheck_Aliases
 
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== buffCheck_Aliases -|
 /return
+
+/bct Ninetoe //casting "Pious Elixir" -targetid|${Spawn[pet ${Spawn[id ${Me.ID}].Pet}].ID}

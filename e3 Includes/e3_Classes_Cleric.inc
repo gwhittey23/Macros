@@ -263,7 +263,32 @@ Sub Event_CorpseExpired(line, corpseExpired)
 }
 /return
 
+#event castPiousLight "<#1#> PLPet"
+#event castPiousLight "#1# tells you, 'PLPet'"
+#event castPiousLight "<#1#> PLPet"
+sub event_castPiousLight(line, ChatSender)
+/if (${Debug} || ${Debug_MAG}) /echo |- castPiousLight ==>
+/call verifyEvent "${ChatSender}" "${ChatText}"
+/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 
+	/declare buffTarget int local
+	/varset buffTarget ${Spawn[pet ${Spawn[pc =${ChatSender}].Pet}].ID}
+	/call e3_Cast ${buffTarget} "Pious Light"
+
+/RETURN
+
+#event castPiousElixir "<#1#> PEPet"
+#event castPiousElixir "#1# tells you, 'PEPet'"
+#event castPiousElixir "<#1#> PEPet"
+sub event_castPiousElixir(line, ChatSender)
+/if (${Debug} || ${Debug_MAG}) /echo |- castPiousElixir ==>
+/call verifyEvent "${ChatSender}" "${ChatText}"
+/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+	/declare buffTarget int local
+	/varset buffTarget ${Spawn[pet ${Spawn[pc =${ChatSender}].Pet}].ID}
+	/call e3_Cast ${buffTarget} "Pious Elixir"
+
+/RETURN
 
 Sub CLR_Setup
 /if (${Debug}) /echo |- CLR_Setup ==>

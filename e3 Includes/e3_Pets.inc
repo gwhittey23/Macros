@@ -233,87 +233,6 @@ SUB buffPet
 /if (${Debug} || ${Debug_Pets}) /echo <== buffPet -|
 /RETURN
 
-
-
-Sub pet_Setup
-/call INItoVar "${advSettings_Ini},Debug,Debug Pets (On/Off)" Debug_Pets bool outer
-/if (${Debug} || ${Debug_Pets}) /echo |- pet_Setup ==>
-
-	/if (${Ini[${Character_Ini},Pets].Length}) {
-		/if (${Ini[${Character_Ini},Pets,Pet Spell].Length}) /call INItoVar "${Character_Ini},Pets,Pet Spell" petSpell string outer
-		/if (${Ini[${Character_Ini},Pets,Pet Taunt (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Taunt (On/Off)" petTaunt bool outer
-		/if (${Defined[petSpell]}) {
-			/declare Pets bool outer TRUE
-			/if (!${Defined[suspend_Pets]}) /declare suspend_Pets bool global FALSE
-			/if (!${Defined[currently_Suspended]}) /declare currently_Suspended bool global FALSE
-			
-			/if (${Ini[${Character_Ini},Pets,Pet Auto-Shrink (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)" petAutoShrink bool outer	
-			/if (${Ini[${Character_Ini},Pets,Pet Heal].Length}) /call INItoVar "${Character_Ini},Pets,Pet Heal" petHeal string outer
-			/if (${Ini[${Character_Ini},Pets,Pet Mend (Pct)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Mend (Pct)" petMendPct int outer
-			|/if (${Ini[${Character_Ini},Pets,Auto-Pet Weapons (On/Off)].Length}) /call IniToVar "${Character_Ini},Pets,Auto-Pet Weapons (On/Off)" autoWeapons bool outer
-			/if (${Ini[${genSettings_Ini},Pets,Summoned Pet Item#1].Length}) /call IniToArray "${genSettings_Ini},Pets,Summoned Pet Item#" summonedpetItems
-
-			/if (${Ini[${Character_Ini},Pets,Pet Buff#1].Length}) {
-				/call INItoArray "${Character_Ini},Pets,Pet Buff#" petBuffs
-				/declare pet_rebuffTimer timer outer
-			}
-		}
-	}
-
-/if (${Debug} || ${Debug_Pets}) /echo <== pet_Setup -|
-/return
-
-
-
-Sub pet_Background_Events
-
-	/doevents suspendMinion
-
-/return
-
-
-
-SUB pet_MacroSettings
-/if (${Debug} || ${Debug_Pets}) /echo |- pet_MacroSettings ==>
-
-	/call WriteToIni "${advSettings_Ini},Debug,Debug Pets (On/Off)"
-
-/if (${Debug} || ${Debug_Pets}) /echo <== pet_MacroSettings -|
-/RETURN
-
-
-
-SUB pet_CharacterSettings
-/if (${Debug} || ${Debug_Pets}) /echo |- pet_CharacterSettings ==>
-
-	/if (${Select[${Me.Class.ShortName},BST,DRD,ENC,MAG,NEC,SHD,SHM]}) {
-		/call WriteToIni "${Character_Ini},Pets,Pet Spell"
-		/call WriteToIni "${Character_Ini},Pets,Pet Taunt (On/Off)"
-		/call WriteToIni "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)"
-		/call WriteToIni "${Character_Ini},Pets,Pet Heal"
-		/call WriteToIni "${Character_Ini},Pets,Pet Mend (Pct)"
-		/call WriteToIni "${Character_Ini},Pets,Pet Buff#1"
-	}
-
-/if (${Debug} || ${Debug_Pets}) /echo <== pet_CharacterSettings -|
-/RETURN
-
-
-
-Sub pet_Aliases
-/if (${Debug} || ${Debug_Pets}) /echo |- pet_Aliases ==>
-
-	/squelch /alias /SuspendPets /bc Suspend Pets
-	/squelch /alias /SusPets /bc Suspend Pets
-	/squelch /alias /ReturnPets /bc Return Pets
-	/squelch /alias /RetPets /bc Return Pets
-	/squelch /alias /ShrinkPets /bc Shrink Pets
-
-/if (${Debug} || ${Debug_Pets}) /echo <== pet_Aliases -|
-/return
-
-
-
 #event petShank "#1# tells you, 'give Shank'"
 #event petShank "<#1#> Pet Shank"
 #event petShank "#1# tells you, 'Pet Shank'"
@@ -321,7 +240,7 @@ Sub pet_Aliases
 sub event_petShank(string line, string ChatSender)
 /echo OK
 /if (${Debug} || ${Debug_MAG}) /echo |- event_petShank ==>
-
+	/echo ${summonedpetItems.Size}
 	/if (${summonedpetItems.Size}) {
 
 		| -Verify the event
@@ -380,8 +299,8 @@ sub event_petShank(string line, string ChatSender)
 
 
 								/varset summonedItem  ${summonedpetItems[${i}].Arg[1,/]}
-								/echo summonedItem = ${summonedItem}
-								/echo ${FindItemCount[=${summonedItem}]} ---
+								/if (${FindItemCount[=${summonedItem}]}<2) /bc ${summonedItem} # = ${FindItemCount[=${summonedItem}]} Need More
+
 								/if (${FindItemCount[=${summonedItem}]}) {
 
 									/if (${Debug} || ${Debug_MAG}) /echo |- event_petShank -| Dropped [${summonedItem}] in my inventory.
@@ -459,13 +378,14 @@ sub event_petShank(string line, string ChatSender)
 /if (${Debug} || ${Debug_MAG}) /echo <== event_petShank -|
 /return
 
-#event distributePetShank "#1# tells you, 'Hand out Pet Shank'"
-#event distributePetShank "<#1#> Hand out Pet Shank"
-#event distributePetShank "#1# tells you, 'Distribute Pet Shank'"
-#event distributePetShank "<#1#> Distribute Pet Shank"
+#event distributePetShank "#1# tells you, 'Hand out Pet Shanks'"
+#event distributePetShank "<#1#> Hand out Pet Shanks"
+#event distributePetShank "#1# tells you, 'Distribute Pet Shanks'"
+#event distributePetShank "<#1#> Distribute Pet Shanks"
 sub event_distributePetShank(line, ChatSender)
 /if (${Debug} || ${Debug_MAG}) /echo |- event_distributePetWeapons ==>
-
+	/echo Start Handing weapons
+	/echo summonedpetItems.Size = ${summonedpetItems.Size}
 	/if (${summonedpetItems.Size}) {
 
 		| -Verify the event
@@ -530,7 +450,7 @@ sub event_distributePetShank(line, ChatSender)
 						| set petOwner and petID, then send the owner a msg.
 						/varset petOwner ${nearbyPetOwners.Arg[${i},,]}
 
-						/call EVENT_petWeapons "${Line}" "${petOwner}"
+						/call Event_petShank "${Line}" "${petOwner}"
 
 						/varcalc i ${i} + 1
 						/if (${Bool[${nearbyPetOwners.Arg[${i},,]}]}) /goto :next_PetOwner
@@ -545,4 +465,89 @@ sub event_distributePetShank(line, ChatSender)
 
 /if (${Debug} || ${Debug_MAG}) /echo <== event_distributePetWeapons -|
 /return
+
+
+Sub pet_Setup
+/call INItoVar "${advSettings_Ini},Debug,Debug Pets (On/Off)" Debug_Pets bool outer
+/if (${Debug} || ${Debug_Pets}) /echo |- pet_Setup ==>
+
+	/if (${Ini[${Character_Ini},Pets].Length}) {
+		/if (${Ini[${Character_Ini},Pets,Pet Spell].Length}) /call INItoVar "${Character_Ini},Pets,Pet Spell" petSpell string outer
+		/if (${Ini[${Character_Ini},Pets,Pet Taunt (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Taunt (On/Off)" petTaunt bool outer
+		/if (${Defined[petSpell]}) {
+			/declare Pets bool outer TRUE
+			/if (!${Defined[suspend_Pets]}) /declare suspend_Pets bool global FALSE
+			/if (!${Defined[currently_Suspended]}) /declare currently_Suspended bool global FALSE
+			
+			/if (${Ini[${Character_Ini},Pets,Pet Auto-Shrink (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)" petAutoShrink bool outer	
+			/if (${Ini[${Character_Ini},Pets,Pet Heal].Length}) /call INItoVar "${Character_Ini},Pets,Pet Heal" petHeal string outer
+			/if (${Ini[${Character_Ini},Pets,Pet Mend (Pct)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Mend (Pct)" petMendPct int outer
+			|/if (${Ini[${Character_Ini},Pets,Auto-Pet Weapons (On/Off)].Length}) /call IniToVar "${Character_Ini},Pets,Auto-Pet Weapons (On/Off)" autoWeapons bool outer
+			/if (${Ini[${genSettings_Ini},Pets,Pet Toy#1].Length}) /call IniToArray "${genSettings_Ini},Pets,Pet Toy#" summonedpetItems
+			/echo Gen_pet = ${summonedpetItems}
+
+
+			/if (${Ini[${Character_Ini},Pets,Pet Buff#1].Length}) {
+				/call INItoArray "${Character_Ini},Pets,Pet Buff#" petBuffs
+				/declare pet_rebuffTimer timer outer
+			}
+		}
+	}
+
+/if (${Debug} || ${Debug_Pets}) /echo <== pet_Setup -|
+/return
+
+
+
+Sub pet_Background_Events
+
+	/doevents suspendMinion
+
+/return
+
+
+
+SUB pet_MacroSettings
+/if (${Debug} || ${Debug_Pets}) /echo |- pet_MacroSettings ==>
+
+	/call WriteToIni "${advSettings_Ini},Debug,Debug Pets (On/Off)"
+
+/if (${Debug} || ${Debug_Pets}) /echo <== pet_MacroSettings -|
+/RETURN
+
+
+
+SUB pet_CharacterSettings
+/if (${Debug} || ${Debug_Pets}) /echo |- pet_CharacterSettings ==>
+
+	/if (${Select[${Me.Class.ShortName},BST,DRD,ENC,MAG,NEC,SHD,SHM]}) {
+		/call WriteToIni "${Character_Ini},Pets,Pet Spell"
+		/call WriteToIni "${Character_Ini},Pets,Pet Taunt (On/Off)"
+		/call WriteToIni "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)"
+		/call WriteToIni "${Character_Ini},Pets,Pet Heal"
+		/call WriteToIni "${Character_Ini},Pets,Pet Mend (Pct)"
+		/call WriteToIni "${Character_Ini},Pets,Pet Buff#1"
+	}
+
+/if (${Debug} || ${Debug_Pets}) /echo <== pet_CharacterSettings -|
+/RETURN
+
+
+
+Sub pet_Aliases
+/if (${Debug} || ${Debug_Pets}) /echo |- pet_Aliases ==>
+
+	/squelch /alias /SuspendPets /bc Suspend Pets
+	/squelch /alias /SusPets /bc Suspend Pets
+	/squelch /alias /ReturnPets /bc Return Pets
+	/squelch /alias /RetPets /bc Return Pets
+	/squelch /alias /ShrinkPets /bc Shrink Pets
+	/squelch /alias /giveshank /tell deva give shank
+	/squelch /alias /hos /bc Hand out Pet Shanks
+
+/if (${Debug} || ${Debug_Pets}) /echo <== pet_Aliases -|
+/return
+
+
+
 

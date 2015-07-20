@@ -129,7 +129,8 @@ SUB AquireFollow
 					| If the FollowTarget is a NetBot, engage MQ2NetAdvPath.
 					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
 						/call TrueTarget ${followTargetID}
-						/squelch /netfollow on
+						/echo ${FollowLength}
+						/netfollow on ${FollowLength}
 					} else /if (${NetAdvPath.State}==2) {
 						/squelch /netfollow unpause
 					}
@@ -1802,9 +1803,9 @@ Sub basics_Setup
 
 	/declare LeashLength int outer 100
 	/if (${Ini[${genSettings_Ini},General,Leash Length].Length} && ${Int[${Ini[${genSettings_Ini},General,Leash Length]}]}) /call IniToVar "${genSettings_Ini},General,Leash Length" LeashLength int outer
-	
-	/if (!${Ini[${genSettings_Ini},General,End MedBreak in Combat(On/Off)].Length}) /call IniToVar "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" medOn_combatBreak bool outer
-	
+	/declare FollowLength int outer 20
+	/if (${Ini[${genSettings_Ini},General,Follow Length].Length} && ${Int[${Ini[${genSettings_Ini},General,Follow Length]}]}) /call IniToVar "${genSettings_Ini},General,Follow Length" FollowLength int outer
+
 	| -Add Groups_Ini file path
 	/if (!${Ini[${MacroData_Ini},File Paths,Saved Groups].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Saved Groups" "e3 Macro Inis\Saved Groups.ini" 1
 	
@@ -1866,6 +1867,7 @@ SUB basics_MacroSettings
 	/call WriteToIni "${genSettings_Ini},General,Max Response Distance" 500
 	/call WriteToIni "${genSettings_Ini},General,Leash Length" 250
 	/call WriteToIni "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" On
+	/call WriteToIni "${genSettings_Ini},General,Follow Length" 25
 
 /if (${Debug} || ${Debug_Basics}) /echo <== basics_MacroSettings -|
 /RETURN

@@ -69,6 +69,7 @@ SUB check_lifeSupport
 				/doability "${castName}"
 			} else {
 				/if (${Target.ID} && ${Target.ID} != ${Me.ID}) /declare oldTarget int local ${Target.ID} 
+				/bc Casting ${lifeSupport[${i}]}
 				/call e3_Cast ${Me.ID} "${lifeSupport[${i}]}"
 			}
 		}
@@ -278,6 +279,8 @@ SUB check_healSpells
 					| If I have a heal to cast, cast it
 					/if (${Bool[${healToUse}]}) {
 						/if (${Debug} || ${Debug_Heals}) /echo Attempting to cast [${healToUse}] on [${healTarget} ${NetBots[${healTarget}].PctHPs}]
+							/if (${HealAnnonuce}) /bc Casting ${healToUse.Arg[1,/]} on ${healTarget}
+							/if (${HealAnnonuce}) /rsay ${healToUse.Arg[1,/]} on ${healTarget}
 						/call e3_Cast ${NetBots[${healTarget}].ID} "${healToUse}/GiveUpTimer|${If[${Me.Gem[${healToUse}]},0,100]}/SubToRun|Heal_CastingChecks"
 						/varset recentHeal_Timer 20
 					}
@@ -521,6 +524,8 @@ SUB check_HoTs
 						} else {
 						
 							| Cast the HoT
+							/if (${HealAnnonuce}) /bc Casting ${healToUse.Arg[1,/]} on ${healTarget}
+							/if (${HealAnnonuce}) /rsay ${healToUse.Arg[1,/]} on ${healTarget}
 							/call e3_Cast ${NetBots[${healTarget}].ID} "${healToUse}/GiveUpTimer|${If[${Me.Gem[${healToUse.Arg[1,/]}]},0,100]}/SubToRun|HoT_CastingChecks"
 							/varset recentHeal_Timer 30
 						}
@@ -673,6 +678,8 @@ SUB check_groupHeals
 			| If I have a heal to cast, cast it
 			/if (${Bool[${healToUse}]}) {
 				/if (${Debug} || ${Debug_Heals}) /echo Attempting to cast [${healToUse}] on [${healTarget} ${NetBots[${healTarget}].PctHPs}]
+				/if (${HealAnnonuce}) /bc Casting ${healToUse.Arg[1,/]} on ${healTarget}
+				/if (${HealAnnonuce}) /rsay ${healToUse.Arg[1,/]} on ${healTarget}
 				/call e3_Cast ${NetBots[${healTarget}].ID} "${healToUse}/GiveUpTimer|${If[${Me.Gem[${healToUse}]},0,100]}"
 				/varset recentHeal_Timer 20
 			}
@@ -693,6 +700,8 @@ SUB check_Pets
 /if (${NetBots[${NetBots.Client[${i}]}].PetID}) {
 	/if (${NetBots[${NetBots.Client[${i}]}].PetHP} < ${PetHeal_Pct} && ${Spawn[${NetBots[${NetBots.Client[${i}]}].PetID}].Distance} < ${Spell[${PetHeal_Spell}].MyRange}) {
 		/if (${Target.ID} != ${NetBots[${NetBots.Client[${i}]}].PetID}) /call TrueTarget ${NetBots[${NetBots.Client[${i}]}].PetID}
+		/if (${HealAnnonuce}) /bc Casting ${healToUse.Arg[1,/]} on ${healTarget}
+		/if (${HealAnnonuce}) /rsay ${healToUse.Arg[1,/]} on ${healTarget}
 		/call e3_Cast ${NetBots[${NetBots.Client[${i}]}].PetID} "${Spell[${PetHeal_Spell}].ID}" Gem${PetHeal_Gem} 3s
 		/varset ActionTaken TRUE
 	}
@@ -729,8 +738,10 @@ SUB heal_Setup
 
 		/if (${Ini[${Character_Ini},Heals,Who to Heal].Length})  /call IniToVar "${Character_Ini},Heals,Who to Heal" WhoToHeal string outer
 		/if (${Ini[${Character_Ini},Heals,Who to HoT].Length})  /call IniToVar "${Character_Ini},Heals,Who to HoT" WhoToHoT string outer
+		/if (${Ini[${Character_Ini},Heals,Annonuce Heal (On/Off)].Length})  /call IniToVar "${Character_Ini},Heals,Annonuce Heal (On/Off)" HealAnnonuce bool outer
+
 	}
-	
+
 	/declare i int local
 
 	| Convert tank array to a string, to be used in ${Select[x,y]} variables

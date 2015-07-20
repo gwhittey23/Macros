@@ -301,7 +301,7 @@ SUB event_buffRequestRelay(line, ChatSender, eventParams)
 					/varset buffTarget ${line.Arg[3, ]}
 				} else /if (${line.Find[Buff me]}) {
 					/varset buffTarget ${Spawn[pc =${ChatSender}].ID}
-				} else /if (${line.Find[Buff pet]} || ${line.Find[Buff my pet]}) {
+				} else /if (${line.Find[Buff pet]} || ${line.Find[Buff my pet]}|| ${line.Find[on my pet]}) {
 					/varset buffTarget ${Spawn[pet ${Spawn[pc =${ChatSender}].Pet}].ID}
 				} else  /if (${SpawnCount[pc ${line.Arg[3, ]}]}) {
 					/varset buffTarget ${Spawn[pc =${line.Arg[3, ]}].ID}

@@ -31,19 +31,19 @@ SUB event_Assist(line, ChatSender, int MobID)
 	
 			/if (${Defined[PauseTarget]}) /deletevar PauseTarget
 		
-		7	| Check that you're not assisting on a corpse, pet or pc
+			| Check that you're not assisting on a corpse, pet or pc
 			/if (${Spawn[id ${MobID}].Type.Equal[Corpse]} || !${Select[${Spawn[id ${MobID}].Type},${AcceptableTargetTypes}]}) {
 				/if (${Toggle-PvP}) /goto :assistAnyway
 				/if (${Debug} || ${Debug_Assists}) /echo [${Spawn[id ${MobID}].CleanName}] is not an acceptable TargetType.
 			} else {
-		
+
 				:assistAnyway
-				
+
 				| Check target distance.
 				/if (${Spawn[${MobID}].Distance} > ${MaxAssistDistance}) {
 					/docommand ${ChatToggle} ${Spawn[${MobID}].CleanName} is too far away.
 				} else {
-				
+
 					| Wait to catch up to group, before engage.
 					/if (${Following} && ${Spawn[${FollowTarget}].Distance} > ${LeashLength} && ${Me.Moving}) {
 						/declare Assist_Moving_Timer timer local 100
@@ -55,31 +55,31 @@ SUB event_Assist(line, ChatSender, int MobID)
 					| Disengage follow.
 					/if (${Stick.Active}) /squelch /stick off
 					/if (${NetAdvPath.State}) /squelch /netfollow pause
-					
+
 					| Set Assist Variables.
 					/varset Assisting TRUE
 					/varset AssistTarget ${MobID}
 					/varset hasTanked FALSE
-					
+
 					| If I am the assist caller, or I am feigning, don't allow macro control.
 					/if (${ChatSender.Equal[${Me.CleanName}]} || ${Me.Feigning}) {
 						/varset AllowControl FALSE
 					} else {
 						/varset AllowControl TRUE
 					}
-					
+
 					| If the macro is controlling me, engage.
 					/if (${AllowControl}) {
 
 						| Output to user
 						/if (${Verbosity}) /docommand ${ChatToggle} Attacking - ${AssistTarget} - ${Spawn[${AssistTarget}].CleanName}
-					
+
 						| Target AssistTarget.
 						/if (${Target.ID} != ${AssistTarget}) /call TrueTarget ${AssistTarget}
-						
+
 						| Melee / Ranged assist
 						/if (${AssistType.Equal[melee]}) {
-						
+
 							/attack on
 							/if (${Int[${AssistDistanceSetting}]}) {
 								/varset AssistStickDistance ${AssistDistanceSetting}
@@ -89,12 +89,12 @@ SUB event_Assist(line, ChatSender, int MobID)
 
 							/call CreateTimer getCloserTimer 70
 							/call StickToAssistTarget
-							
+
 						} else /if (${AssistType.Equal[ranged]}) {
 							/autofire on
 							/squelch /stick hold moveback ${RangedStickDistance}
 						}
-						
+
 						| Send in pets.
 						/if (${Me.Pet.ID}) {
 							/if (${Target.ID} != ${AssistTarget}) /call TrueTarget ${AssistTarget}
@@ -103,14 +103,14 @@ SUB event_Assist(line, ChatSender, int MobID)
 							/pet attack
 						}
 					}
-					
+
 					/varset combatTimer ${combatDelay}
 					/if (${Debug} || ${Debug_Assists}) /echo Assist=${Assisting} || AssistTarget=${AssistTarget} || AllowControl=${AllowControl}
 				}
 			}
 		}
 	}
-	
+
 /if (${Debug} || ${Debug_Assists}) /echo <== event_Assist -|
 /RETURN
 
@@ -155,14 +155,14 @@ SUB Event_BackOff(line, ChatSender)
 |----------------------------------------------------------------|
 SUB AssistOff
 /if (${Debug} || ${Debug_Assists}) /echo |- AssistOff -| ==>
-	
+
 	| Interrupt spells, turn off attack.
 	/if (${AllowControl}) {
 		/if (${Me.Casting.ID} && !${Spell[${Me.Casting}].SpellType.Find[beneficial]} && ${Me.Class.ShortName.NotEqual[BRD]}) /stopcast
 		/if (${Me.Combat}) /attack off
 		/if (${Me.AutoFire})  /autofire off
 	}
-	
+
 	| Reset assist variables.
 	/varset Assisting FALSE
 	/varset AssistTarget 0
@@ -170,16 +170,16 @@ SUB AssistOff
 	/varset hasTanked FALSE
 	/varset enraged FALSE
 	/varset enrageAttack FALSE
-	
+
 	| Reset Burns
 	/if (${Defined[use_QuickBurns]}) /deletevar use_QuickBurns
 	/if (${Defined[use_FullBurns]}) /deletevar use_FullBurns
-	
+
 	| Check loot, and reacquire follow.
 	/if (${Select[${Stick},ON]}) /squelch /stick off
 	/if (${Following}) /call AquireFollow
 	/doevents YourKill
-	
+
 /if (${Debug}) {
 	/echo Assisting: [${Assisting}] || AssistTarget: [${AssistTarget}]
 	/echo |- AssistOff -| <==
@@ -829,7 +829,7 @@ SUB cast_longTermSpells(int spellTarget, string arrayName)
 		
 			| cast the spell
 			/call e3_Cast ${spellTarget} "${${arrayName}[${i}]}${If[${Me.Book[${castName}]},/GiveUpTimer|${If[${Me.Gem[${castName}]},3s,${If[${Me.Combat} || ${AssistType.Equal[melee]},0s,${Math.Calc[${Spell[${castName}].RecastTime} + 5].Int}s]}]},]}"
-			
+			/bc Casting ${castName} on ${Spawn[id ${spellTarget}].CleanName}
 			| If the spell was resisted.
 			/if (${lastCast.Equal[${castName}]} && ${castReturn.Equal[RESISTED]}) {
 				/if (${Target.ID}) /docommand ${ChatToggle} **Warning** ${Spawn[id ${spellTarget}].CleanName} resisted ${If[${castType.Equal[item]},${FindItem[=${castName}].Spell},${castName}]}.
@@ -849,7 +849,7 @@ SUB cast_longTermSpells(int spellTarget, string arrayName)
 				/if (${Debug} || ${Debug_Assists}) /echo |- longTermSpells - [${arrayName}] -| Creating timer [${spellTimer}] -- [${newTimerSetting}]
 				/if (${longTerm_recastBuffer}) /varcalc newTimerSetting ${newTimerSetting} - ${longTerm_recastBuffer}
 				/call createTimer "${spellTimer}" "${newTimerSetting}"
-			
+				/if (${Target.ID}) /docommand ${ChatToggle} **Success** ${Spawn[id ${spellTarget}].CleanName} ${If[${castType.Equal[item]},${FindItem[=${castName}].Spell},${castName}]}.
 			| If the spell was not ready
 			} else /if (${lastCast.Equal[${castName}]} && ${castReturn.Equal[NOTREADY]}) {
 				

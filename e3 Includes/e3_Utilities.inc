@@ -32,10 +32,11 @@ SUB IniToVar(Ini_Key, VarToMake, VarType, VarScope)
 /if (${Debug}) /echo |- IniToVar [${Ini_Key}] ==>
 
 	| Check for the specified ini key.
+
 	/if (!${Ini[${Ini_Key}].Length}) {
 		/if (${Debug}) /echo [${Ini_Key}] not found.
 	} else {
-	
+
 		| Validate bool.
 		/if (${VarType.Equal[bool]}) {
 			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
