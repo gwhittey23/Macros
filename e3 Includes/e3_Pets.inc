@@ -60,7 +60,7 @@ SUB summonPet
 
 
 #event suspendMinion "<#1#> Suspend Pets#*#"
-SUB event_suspendMinion(live, ChatSender)
+SUB event_suspendMinion(line, ChatSender)
 /if (${Debug} || ${Debug_Pets}) /echo |- EVENT_suspendMinion ==>
 
 	| -Verify the event
@@ -169,7 +169,7 @@ SUB event_mapPetAttack(line, ChatSender, eventParams)
 	|    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]}) {
 		/call TrueTarget ${eventParams.Arg[1, ]}
-		/pet qattack
+		/pet attack
 	}
 
 /RETURN

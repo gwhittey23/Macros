@@ -19,6 +19,7 @@
 #include e3 Includes\e3_CorpseSummoning.inc
 #include e3 Includes\e3_HealChain.inc
 #include e3 Includes\e3_Heals.inc
+#include e3 Includes\PetHunt.inc
 #include e3 Includes\e3_Loot.inc
 #include e3 Includes\e3_Pets.inc
 #include e3 Includes\e3_Sell.inc

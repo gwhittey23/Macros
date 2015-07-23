@@ -210,6 +210,7 @@ sub event_AutoMez
 	/echo |- AutoMez -| <==
 }
 /return
+
 sub MezTarget
 /declare GiveUpValue int local 3
 /if (${${Target.ID}${Spell[${AutoMez_Spell}].ID}} == 0) {

@@ -1777,7 +1777,33 @@ SUB EVENT_reportMana(line,ChatSender)
 }
 /RETURN
 
+|----------------------------------------------------------------------------|
+|- Will have all bots use charm item										-|
+|----------------------------------------------------------------------------|
+|- Use, /ThfGate, or ThfGate, The Hidden Foreset Gate					-|
+|----------------------------------------------------------------------------|
+#EVENT ThfGate	"[#1#] ThfGate"
+#EVENT ThfGate	"<#1#> ThfGate"
+#EVENT ThfGate "#1# tells you, 'ThfGate'"
+#EVENT ThfGate "#1# tells the group, 'ThfGate'"
+#EVENT ThfGate "#1# you tell your party, 'ThfGate'"
+#EVENT ThfGate	"<#1#> The Hidden Foreset Gate"
+#EVENT ThfGate "#1# tells you, 'The Hidden Foreset Gate'"
+#EVENT ThfGate "#1# tells the group, 'The Hidden Foreset Gate'"
+#EVENT ThfGate "#1# you tell your party, 'The Hidden Foreset Gate'"
+SUB EVENT_ThfGate(line, ChatSender, eventParams)
+	| -Verify the event
+	/echo Gateing to THF
+	/call verifyEvent "${ChatSender}" "${line}"
+	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+	|    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]}) {
+		/call e3_Cast ${Me.ID}} "Charm of Queen Adrianne"
+		/call e3_Cast ${Me.ID}} "Advanced Charm of Queen Adrianne"
 
+	}
+
+/RETURN
 
 Sub basics_Setup
 /call INItoVar "${advSettings_Ini},Debug,Debug Basics (On/Off)" Debug_Basics bool outer
