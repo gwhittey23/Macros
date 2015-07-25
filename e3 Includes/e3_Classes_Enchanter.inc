@@ -186,6 +186,7 @@ Sub ENC_Aliases
 #event AutoMez "<#*#> Mez All"
 sub event_AutoMez
 /echo mezz
+/bc Mez on
 /if (${Debug}) /echo |- AutoMez -| ==>
 /if (!${Defined[AutoMez_Spell]} && ${Ini[${Character_Ini},Enchanter,Auto-Mez (Spell/Gem/MaxLevel)].Length}) {
 	/call INItoVar "${Character_Ini},Enchanter,Auto-Mez (Spell/Gem/MaxLevel)" UNDEFINED string local
@@ -216,6 +217,7 @@ sub MezTarget
 /if (${${Target.ID}${Spell[${AutoMez_Spell}].ID}} == 0) {
 	/if (!${Defined[${Target.ID}${Spell[${AutoMez_Spell}].ID}]}) /declare ${Target.ID}${Spell[${AutoMez_Spell}].ID} timer outer 0
 	:recast
+	/bc Casting ${AutoMez_Spell} on ${Target.CleanName}
 	/call e3_Cast ${Target.ID} "${AutoMez_Spell}" Gem${AutoMez_Gem} 5s
 	/if (${Select[${castReturn},CAST_RESISTED]}) {
 		/if (!${Defined[ResistRetry]}) /declare ResistRetry int local 0
@@ -260,3 +262,48 @@ sub event_AutoMez_On
 	/varset do_AutoMez TRUE
 }
 /return
+#event MezThisTarget "#1# tell your party, 'Mez on #2#'"
+#event MezThisTarget "#1# tells the group, 'Mez on #2#'"
+#event MezThisTarget "#1# tells you, 'Mez on #2#'"
+#event MezThisTarget "#1# tells the raid, 'Mez on #2#'"
+SUB event_MezThisTarget(line, ChatSender, int MobID)
+| -Verify the event
+	/call verifyEvent "${ChatSender}" "${line}"
+	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+	|    |-----------Valid User----------|    |-----------In Zone-------------|    |------------In Range------------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+	/declare GiveUpValue int local 3
+	/if (${${MobID}${Spell[${AutoMez_Spell}].ID}} == 0) {
+		/if (!${Defined[${Target.ID}${Spell[${AutoMez_Spell}].ID}]}) /declare ${MobID}${Spell[${AutoMez_Spell}].ID} timer outer 0
+		:recast
+		/call e3_Cast ${MobID} "${AutoMez_Spell}" Gem${AutoMez_Gem} 5s
+		/if (${Select[${castReturn},CAST_RESISTED]}) {
+			/if (!${Defined[ResistRetry]}) /declare ResistRetry int local 0
+			/docommand ${ChatToggle} **Warning** ${Target.CleanName} resisted ${AutoMez_Spell}.
+			/if (${Defined[ResistRetry]}) /varcalc ResistRetry ${ResistRetry}+1
+			/if (${ResistRetry} < ${GiveUpValue}) /goto :recast
+		} else /if (${Select[${castReturn},CAST_IMMUNE]}) {
+			/varset ${MobID}${Spell[${AutoMez_Spell}].ID} 20000000
+			/docommand ${ChatToggle} **Warning** ${Target.CleanName} is IMMUNE to ${AutoMez_Spell}.
+		} else /if (${Select[${castReturn},CAST_CANNOTSEE]} && ${spamTimer}==0) {
+			/if (!${Defined[Retry]}) /declare LOSRetry int local 0
+			/docommand ${ChatToggle} **Warning** I cannot see ${Target.CleanName}!!.
+			/if (${Defined[spamTimer]}) /varset spamTimer 15s
+			/if (${Defined[LOSRetry]}) /varcalc LOSRetry ${LOSRetry}+1
+			/if (${LOSRetry} < ${GiveUpValue}) /goto :recast
+		} else /if (${Select[${castReturn},CAST_OUTOFMANA]} && ${spamTimer}==0) {
+			/docommand ${ChatToggle} **Warning** I do not have enough mana to cast ${MyDebuffs[${i}]}!!.
+			/if (${Defined[spamTimer]}) /varset spamTimer 15s
+		} else /if (${Select[${castReturn},CAST_OUTOFRANGE]} && ${spamTimer}==0) {
+			/docommand ${ChatToggle} **Warning** ${MyDebuffs[${i}]} is out of range for ${MyDebuffs[${i}]}!!.
+			/if (${Defined[spamTimer]}) /varset spamTimer 15s
+		} else /if (${Select[${castReturn},CAST_SUCCESS]})	{
+			/docommand ${ChatToggle} Landed ${AutoMez_Spell} on ${Target.CleanName}!!.
+			/if (${Defined[${MobID}${Spell[${AutoMez_Spell}].ID}]}) /varset ${MobID}${Spell[${AutoMez_Spell}].ID} ${Math.Calc[${Spell[${AutoMez_Spell}].Duration} * 6-6]}s
+		}
+	}
+	/delay 5s !${Me.Casting.ID}
+}
+/return
+
+

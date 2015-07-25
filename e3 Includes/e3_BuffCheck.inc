@@ -317,7 +317,7 @@ SUB event_castGroupBuffs(line, ChatSender)
 				} else {
 					
 					/for i 1 to ${GroupBuffs.Size}
-					
+						/bc ${GroupBuffs[${i}]}
 						/call e3_Cast ${buffTarget} "${GroupBuffs[${i}]}/giveuptimer|45s"	
 					
 					/next i

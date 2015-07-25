@@ -103,6 +103,7 @@ Sub startPetHunter
    /call BuildArray SaveLoc ""
    :Start
    /echo Main Loop
+|**
    /if (!${Me.PetBuff["Moon Curse Rk. I"]}) {
       /bct Beerstand //casting "Moon Curse Rk. I" -targetid|${Spawn[pet ${Spawn[id ${Me.ID}].Pet}].ID}
       /delay 5s
@@ -123,6 +124,7 @@ Sub startPetHunter
       /delay 2s
       /goto :Start
    }
+**|
    /if (!${Me.PetBuff["Elemental Fury"]}) {
       /call e3_Cast ${Me..Pet.ID} "Elemental Fury"
       /delay 2s
@@ -171,7 +173,7 @@ Sub GetTarget
    /declare RV_CurrentRadius   int local
    /declare RV_TargetSub   int local
    :Acquire
-   /for RV_CurrentRadius 50 to ${RV_MaxRadius} step 50
+   /for RV_CurrentRadius 25 to ${RV_MaxRadius} step 25
       /for RV_TargetSub 1 to ${RV_MobArray.Size}
          |/echo radius ${RV_CurrentRadius}  ${RV_InvalidTargetID} npc ${RV_MobArray[${RV_TargetSub}]}
          /squelch /target radius ${RV_CurrentRadius}  npc ${RV_MobArray[${RV_TargetSub}]}
@@ -204,7 +206,7 @@ Sub GetTarget
               /varset RV_InvalidTargetID ${Target.ID}
             }
             /call Triangulate_Distance ${Target.Loc} ${Me.Loc.Replace[ ,]}
-            /echo mop is ${Macro.Return} distance
+            /echo mop is ${Macro.Return} distance ${Target.Distance}
             /if (${Macro.Return} > ${RV_MaxRadius})  {
                /bc Mob out of Range getting another
                /stick on
