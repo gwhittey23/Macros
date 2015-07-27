@@ -93,6 +93,13 @@ SUB e3_Setup(modeSelect)
 	} else {
 		/declare Character_Ini string outer ${Ini[${MacroData_Ini},File Paths,Bot Settings]}
 	}
+	| Hunter Pet Settings
+	/if (!${Ini[${MacroData_Ini},File Paths,Pet Hunter Settings].Length}) {
+		/echo ERROR: Could not find designated file path for [Bot Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
+		/endmacro
+	} else {
+		/declare PetHunter_Ini string outer ${Ini[${MacroData_Ini},File Paths,Pet Hunter Settings]}
+	}
 	
 | Create Ini files ======================================================================================================== 
 	/if (${Bool[${Ini[${genSettings_Ini}]}]} && !${Ini[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]}) /echo New version of e3 detected. Hold on to your nuggets!

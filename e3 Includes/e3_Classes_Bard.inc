@@ -145,7 +145,43 @@ SUB restart_Melody
 /if (${Debug}) /echo <== check_Melody -|
 /RETURN
 
+|--------------------------------------------------------------------------------|
+|- Engages Calm Son functions on Target.										-|
+|--------------------------------------------------------------------------------|
+|- Use, 'calm on ${Target.ID}' in /tell, /group, or /bc.						-|
+|--------------------------------------------------------------------------------|
+#event Calm "<#1#> Calm on #2#"
+#event Calm "#1# tell your party, 'Calm on #2#'"
+#event Calm "#1# tells the group, 'Calm on #2#'"
+#event Calm "#1# tells you, 'Calm on #2#'"
+SUB event_Calm(line, ChatSender, int MobID)
+	| -Verify the event
+	/call verifyEvent "${ChatSender}" "${line}"
+	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+	|    |-----------Valid User----------|    |-----------In Zone-------------|    |------------In Range------------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+		|    |--------Included Bot-----------|
+		/if (${Me.Class.ShortName.Equal[BRD]}) {
+			| Check that you're not assisting on a corpse, pet or pc
+				/if (${Spawn[id ${MobID}].Type.Equal[Corpse]} || !${Select[${Spawn[id ${MobID}].Type},${AcceptableTargetTypes}]}) {
 
+					/echo [${Spawn[id ${MobID}].CleanName}] is not an acceptable TargetType.
+				} else {
+						/declare castName string local
+						/declare spellTarget int local
+						/declare gemNumber int local ${DefaultGem}
+						/varset spellTarget ${MobID}
+						/varset castName CalmSong
+						/target id ${MobID}
+						| Check /gem|
+						/if (${CalmSong.Find[/gem|]}) {
+							/call argueString gem| "${CalmSong}"
+							/varset gemNumber ${Macro.Return}
+						}
+						/twist once ${gemNumber}
+		}
+	}
+/return
 
 Sub BRD_Setup
 /if (${Debug}) /echo |- BRD_Setup ==>
@@ -156,7 +192,7 @@ Sub BRD_Setup
 	/if (!${Defined[songSet]}) /declare songSet string global
 	
 	/call InitoVar "${Character_Ini},Bard,Auto-Melody" autoMelody string outer
-	
+	/if (${Ini[${Character_Ini},Bard,Calm Song].Length}) /call IniToVar "${Character_Ini},Bard,Calm Song" CalmSong string outer
 	| Start Auto-Melody at start-up.  Currently disabled to check auto start in check_Zone sub.
 	| /if (${Defined[autoMelody]} && !${songSet.Length}) /startmelody ${autoMelody} /only|ME
 	
@@ -187,7 +223,7 @@ SUB BRD_MacroSettings
 	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#1" "check_Burns" 1
 	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#2" "check_CombatBuffs" 1
 	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#3" "check_Buffs" 1
-
+	/if (!${Ini[${Character_Ini},Bard,Calm Song].Length}) /call WriteToIni "${Character_Ini},Bard,Calm Song","Luvwen's Aria of Serenity/gem|6"
 /if (${Debug}) /echo <== BRD_MacroSettings -|
 /RETURN
 
@@ -208,6 +244,7 @@ Sub BRD_Aliases
 
 	/squelch /alias /SaveMelody /echo Save Melody
 	/squelch /alias /PlayMelody /bc  Melody
+	/squelch /alias /CalmIt /bc Calm on ${Target.ID}
 
 /if (${Debug}) /echo <== BRD_Aliases -|
 /return

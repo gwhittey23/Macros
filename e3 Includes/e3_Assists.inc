@@ -303,8 +303,12 @@ SUB check_AssistStatus
 			
 			/if (${Debug} || ${Debug_Assists}) /echo Macro control is not allowed.  Assist functions are restricted. 
 				| Check enrage when enrageAttack is on
-				/if (${enraged} && ${enrageAttack} && !${Stick.Behind}) /attack off
-				
+				/if (${enraged} && ${enrageAttack} && !${Stick.Behind}) {
+
+				/attack off
+				/if (${Me.Pet.ID}) /pet back off
+				/if (${Me.Pet.ID}) /pet hold
+				}
 			} else {
 			
 				| Check Target.
@@ -334,14 +338,21 @@ SUB check_AssistStatus
 						
 						| If mob is not enraged and I'm not attacking, start attacking.
 						/if (!${enraged}) {
-							/if (!${Me.Combat}) /attack on
-						
+							/if (!${Me.Combat}) {
+							/attack on
+
+							}
 						| If mob is enraged
 						} else {
 							
 							| If enrageAttack is FALSE turn off attack
 							/if (!${enrageAttack}) {
-								/if (${Me.Combat}) /attack off
+								/if (${Me.Combat})  {
+								/attack off
+								/echo Pet attack off 3
+								/if (${Me.Pet.ID}) /pet back off
+								/if (${Me.Pet.ID}) /pet hold
+								}
 							} else {
 							
 								| Check if the mob is looking at me
@@ -460,7 +471,10 @@ SUB Event_EnrageOn(line, RageOn)
 	| Verify that the enraged npc is what I am currently fighting.
 	/if (${Me.Combat} && ${Target.ID} == ${Spawn[${RageOn}].ID} && ${Target.PctHPs} < 20) {
 		/varset enraged TRUE
+		/echo Pet attack off Enrage
 		/if (${Me.Pet.ID}) /pet back off
+		/if (${Me.Pet.ID}) /pet hold
+		/bc Backing Pet off enrage
 		/if (${Debug} || ${Debug_Assists}) /echo enraged = ${enraged}
 		
 		| Check if the entry for this NPC exists

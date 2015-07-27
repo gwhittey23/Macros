@@ -46,7 +46,8 @@ SUB check_castLich
 	/if (${Defined[lichSpell]} && !${Me.Buff[${lichSpell}].ID} && ${Me.PctMana} < 90) {
 
 		| If I don't have lich on.
-		/if (${Spell[${lichSpell}].Stacks}) /call e3_Cast ${Me.ID} "${lichSpell}/GiveUpTimer|${If[${Me.Gem[${lichSpell.Arg[1,/]}]},0,7s]}"
+
+		/if (${Spell[${lichSpell.Arg[1,/]}].Stacks}) /call e3_Cast ${Me.ID} "${lichSpell}/GiveUpTimer|${If[${Me.Gem[${lichSpell.Arg[1,/]}]},0,7s]}"
 	}
 
 /if (${Debug}) /echo <== check_castLich -|
@@ -57,8 +58,8 @@ SUB check_castLich
 SUB check_removeLich
 /if (${Debug}) /echo |- check_removeLich ==>
 
-	/if (${Me.Buff[${lichSpell}].ID}) {
-		/if (${Me.PctHPs} < 20 || ${Me.PctMana} == 100 && !${combatTimer}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[${lichSpell}].ID}-1].Int} leftmouseup
+	/if (${Me.Buff[${lichSpell.Arg[1,/]}].ID}) {
+		/if (${Me.PctHPs} < 20 || ${Me.PctMana} == 100 && !${combatTimer}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[${lichSpell.Arg[1,/]}].ID}-1].Int} leftmouseup
 	}
 
 /if (${Debug}) /echo <== check_removeLich -|

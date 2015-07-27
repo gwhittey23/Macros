@@ -330,7 +330,22 @@ sub event_castPyrilenSkin(line, ChatSender)
 
 /RETURN
 
+#event castAncientPyrilenSkin "<#1#> AdvDmgSkinPet"
+#event castAncientPyrilenSkin "#1# tells you, 'AdvDmgSkinPet'"
+#event distributcastPyrilenSkinePetWeapons "<#1#> AdvDmgSkinPet"
+sub event_castAncientPyrilenSkin(line, ChatSender)
+/bc ok
+/if (${Debug} || ${Debug_MAG}) /echo |- event_castPyrilenSkin ==>
+/call verifyEvent "${ChatSender}" "${ChatText}"
+/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+/bc sender=${Macro.Return.Arg[1,_]}
+/bc booll=${Bool[${Macro.Return.Arg[2,_]}]}
+	/bc ok2
+	/declare buffTarget int local
+	/varset buffTarget ${Spawn[pet ${Spawn[pc =${ChatSender}].Pet}].ID}
+	/call e3_Cast ${buffTarget} "Ancient: Veil of Pyrilonus"
 
+/RETURN
 
 SUB MAG_MacroSettings
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_MacroSettings ==>

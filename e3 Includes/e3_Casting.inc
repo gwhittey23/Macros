@@ -45,7 +45,7 @@ SUB e3_Cast(int targetID, castParams)
 	/varset castReturn PENDING
 	/varset castEndTime 0
 	/varset giveUpTimer 0
-	
+
 	| Check Cursor.
 	/if (${Cursor.ID}) {
 		/if (${Debug} || ${Debug_Casting}) /echo Cannot cast while holding an item.
@@ -277,7 +277,7 @@ SUB cast_Spell(int targetID, castParams)
 
 		| If the spell is not memmed
 		/if (!${Me.Gem[${pendingCast}]}) {
-			
+
 			| Check memming conditions
 			/if (!${Window[SpellBookWnd].Open} && !${Me.Moving} && ${giveUpTimer} > 5) {
 				

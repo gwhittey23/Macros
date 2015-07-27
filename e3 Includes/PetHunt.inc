@@ -59,7 +59,14 @@ Sub startPetHunter
    |------------------------------------------------------------
    |Loot Array Information.
    |------------------------------------------------------------
-   /call ReadINI "e3 Macro Inis\PetHunter.ini" "${Zone.Name}" Mob
+   /if (${Ini[${PetHunter_Ini},${Zone.Name},Saved Loc#1].Length}) /bc ${Ini[${PetHunter_Ini},${Zone.Name},Saved Loc#1].Length}
+    /if (${Ini[${PetHunter_Ini},${Zone.Name},Saved Loc#1].Length}) /call IniToArray "${PetHunter_Ini},${Zone.Name},Saved Loc#" SavedLoc
+   /bc SavedLoc.Size = ${SavedLoc.Size}
+   /declare i int local
+   /for i 1 to ${SavedLoc.Size}
+      /gu ${SavedLoc[${i}]}
+   /next i
+   |/call ReadINI "e3 Macro Inis\PetHunter.ini" "${Zone.Name}" Mob
    /if (!${Defined[RV_MobArray]}) {
       /echo Mob Array Creation Error, ending macro...
       /endmacro
@@ -94,13 +101,9 @@ Sub startPetHunter
    /varcalc RV_FastRange ${RV_Range}+3
    /varcalc RV_RangeMax ${RV_Range}+1
    /varcalc RV_RangeMin ${RV_Range}-1
-   /call BuildArray SavedLoc "-157,0"
-   /call BuildArray SavedLoc "24,79"
-   /call BuildArray SavedLoc "147,87"
-   /call BuildArray SavedLoc "-110,-13"
-   /call BuildArray SavedLoc "86,-15"
-   /call BuildArray SavedLoc "15,-49"
-   /call BuildArray SaveLoc ""
+
+
+
    :Start
    /echo Main Loop
 |**
